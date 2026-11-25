@@ -1,0 +1,185 @@
+html {
+    font-family: 'Montserrat', sans-serif;
+}
+
+body {
+    margin: 0;
+    background-color: #efefef;
+}
+
+header {
+    background-color: #364552;
+    color: white;
+    padding: 3rem 2rem;
+}
+
+header h1 {
+    font-size: 4rem;
+    text-align: center;
+}
+
+#intro {
+    text-align: center;
+    padding: 3rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+#intro h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #364552;
+}
+
+#intro p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+    margin: 0;
+}
+
+#servicios {
+    text-align: center;
+}
+
+#servicios h2 {
+    font-size: 2rem;
+    color: #364552;
+    margin-bottom: 1.5rem;
+}
+
+.contenedor {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    padding: 20px;
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.contenedor article {
+    background-color: #fff;
+    width: 300px;
+    box-sizing: border-box;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0;
+    margin: 0;
+}
+
+section article:hover {
+    box-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.3);
+}
+
+section article h3, section article p {
+    margin: 1rem;
+}
+
+#reservacion {
+    max-width: 980px;
+    margin: 3rem auto;
+    padding: 2rem;
+}
+
+#reservacion h2 {
+    text-align: center;
+    color: #364552;
+    font-size: 2rem;
+}
+
+#reservacion p {
+    text-align: center;
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 2rem;
+}
+
+#reservacion form {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+#reservacion label {
+    font-weight: bold;
+    color: #364552;
+}
+
+#reservacion input, #reservacion select, #reservacion textarea {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 0.4rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+#reservacion textarea {
+    resize: vertical;
+}
+
+#reservacion input:focus, #reservacion select:focus, #reservacion textarea:focus {
+    outline: none;
+    border-color: #364552;
+}
+
+#reservacion button {
+    background-color: #364552;
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 0.4rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#reservacion button:hover {
+    background-color: #506779;
+}
+
+footer {
+    background-color: #222;
+    padding: 3rem;
+    color: #fff;
+}
+
+footer section {
+    float: right;
+    display: flex;
+    gap: 25px;
+}
+
+footer p {
+    margin: 0;
+}
+
+footer a {
+    transition: color 0.3s ease;
+    color: #fff;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: #6495ED;
+}
+
+@media (max-width: 600px) {
+    footer section {
+        float: none;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    footer p {
+        text-align: center;
+    }
+}

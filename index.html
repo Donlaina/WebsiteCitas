@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Barbería | Portal de Reservas</title>
+    <link rel="icon" type="image/png" href="img/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 id="inicio">Barbería | Portal de Reservas</h1>
+    </header>
+
+    <section id="intro">
+        <h2>Conoce Nuestros Estilos y Cortes de Pelo</h2>
+        <p>En nuestra barbería encontrarás una variedad de estilos y servicios diseñados para 
+            resaltar tu personalidad. Desde cortes clásicos hasta diseños modernos, ofrecemos 
+            atención de calidad y dedicación en cada detalle. Explora nuestros servicios y 
+            encuentra el estilo ideal para ti.</p>
+    </section>
+
+    <section id="servicios">
+        <h2>Nuestros Servicios</h2>
+    </section>
+
+    <section class="contenedor">
+        <article>
+                <h3>Corte Normal</h3>
+                <img src="img/normal.jpg" alt="Corte de pelo normal" height="300px">
+                <p>Un corte clásico y moderno, adaptado a tu estilo y preferencia para lucir 
+                    siempre impecable.</p>
+                <p><strong>Precio: L 100.00</strong></p>
+            </article>
+
+            <article>
+                <h3>Barba</h3>
+                <img src="img/barba.jpg" alt="Arreglo de barba" height="300px">
+                <p> Dale a tu barba el cuidado que merece con un perfilado y acabado limpio y 
+                    definido.</p>
+                <p><strong>Precio: L 50.00</strong></p>
+            </article>
+
+            <article>
+                <h3>Gillette</h3>
+                <img src="img/gillette.jpg" alt="Afeitado con Gillette" height="300px">
+                <p> Un acabado preciso y al ras para quienes buscan una apariencia limpia y 
+                    elegante.</p>
+                <p><strong>Precio: L 40.00</strong></p>
+            </article>
+
+            <article>
+                <h3>Cejas</h3>
+                <img src="img/cejas.jpg" alt="Diseño de cejas" height="300px">
+                <p> Define y mejora tu mirada con un diseño de cejas limpio y acorde a tu 
+                    rostro.</p>
+                <p><strong>Precio: L 30.00</strong></p>
+            </article>
+
+            <article>
+                <h3>Diseño</h3>
+                <img src="img/diseno.jpg" alt="Diseño de corte de pelo" height="300px">
+                <p> Dale un toque único a tu estilo con diseños personalizados y detalles que 
+                    marcan la diferencia.</p>
+                <p><strong>Precio: L 50.00</strong></p>
+            </article>
+    </section>
+
+    <section id="reservacion">
+        <h2>Reserva Tu Cita</h2>
+        <p>¡Tu próximo estilo comienza aquí! Completa nuestro formulario de reservas, ingresa 
+            tus datos y selecciona el servicio que deseas, junto con la fecha y hora que mejor 
+            se adapten a tu disponibilidad. Nosotros nos encargaremos de ofrecerte una excelente 
+            experiencia.</p>
+
+        <!-- No se ha definido donde se recibira la informacion del formulario -->
+        <form action="#" method="POST">
+            <label for="nombre">Nombre completo:</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre completo" 
+            required>
+
+            <label for="telefono">Teléfono:</label>
+            <input type="text" id="telefono" name="telefono" placeholder="Ingresa tu número de teléfono" 
+            pattern="[0-9]{8}" minlength="8" maxlength="8" inputmode="numeric" 
+            title="El teléfono debe contener exactamente 8 números" required>
+
+            <label for="correo">Correo electrónico:</label>
+            <input type="email" id="correo" name="correo" placeholder="Ingresa tu correo electrónico" 
+            required>
+
+            <label for="corte">Tipo de corte:</label>
+            <select id="corte" name="corte" required>
+                <option value="">Selecciona un servicio</option>
+                <option value="normal">Corte Normal - L 100.00</option>
+                <option value="barba">Barba - L 50.00</option>
+                <option value="gillette">Gillette - L 40.00</option>
+                <option value="cejas">Cejas - L 30.00</option> <option value="diseno">Diseño - L 50.00</option>
+            </select>
+
+            <label for="fecha">Fecha de reserva:</label>
+            <input type="date" id="fecha" name="fecha" required>
+
+            <label for="hora">Hora de reserva:</label>
+            <select id="hora" name="hora" required><option value="">Selecciona una hora</option></select>
+
+            <label for="informacion">Información adicional:</label>
+            <textarea id="informacion" name="informacion" cols="50" rows="10" 
+            placeholder="Escribe aquí algún comentario o indicación especial..." ></textarea>
+
+            <button type="submit">Reservar Cita</button>
+        </form>
+    </section>
+
+    <!-- No se ha definido que correo recibira el mensaje de contacto, actualmente es text@test.com -->
+    <footer id="contacto">        
+        <section>
+            <a href="#inicio">Inicio</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#reservacion">Reservar</a>
+            <a href="mailto:test@test.com">Contactame aqui</a>
+        </section>
+
+        <p>&copy; 2026 Barbería. Todos los derechos reservados.</p>
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+
+    <!-- Fecha -->
+    <script>
+    const fecha = new Date();
+
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+
+    const fechaActual = `${anio}-${mes}-${dia}`;
+
+    document.getElementById("fecha").min = fechaActual;
+    </script>
+
+    <!-- Fecha -->
+    <script>
+    const hora = document.getElementById("hora");
+
+    for (let h = 8; h <= 16; h++) {
+        for (let m = 0; m < 60; m += 30) {
+
+            if (h === 16 && m > 30) break;
+
+            let valor = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+
+            let ampm = h < 12 ? "AM" : "PM";
+            let hora12 = h % 12 || 12;
+
+            hora.innerHTML += `
+                <option value="${valor}">
+                    ${hora12}:${String(m).padStart(2, '0')} ${ampm}
+                </option>
+            `;
+        }
+    }
+    </script>
+</body>
+</html>
