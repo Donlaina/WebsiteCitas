@@ -11,11 +11,29 @@ header {
     background-color: #364552;
     color: white;
     padding: 3rem 2rem;
+    position: relative;
 }
 
 header h1 {
     font-size: 4rem;
     text-align: center;
+}
+
+.btn-admin {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    background-color: #6495ED;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 0.4rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-admin:hover {
+    background-color: #4169E1;
 }
 
 #intro {

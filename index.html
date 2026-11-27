@@ -11,6 +11,8 @@
 <body>
     <header>
         <h1 id="inicio">Barbería | Portal de Reservas</h1>
+        <!-- No se ha definido a donde los enviara este boton -->
+        <a href="#" class="btn-admin">Admin</a>
     </header>
 
     <section id="intro">
@@ -96,6 +98,15 @@
                 <option value="barba">Barba - L 50.00</option>
                 <option value="gillette">Gillette - L 40.00</option>
                 <option value="cejas">Cejas - L 30.00</option> <option value="diseno">Diseño - L 50.00</option>
+            </select>
+
+            <label for="barbero">Selecciona tu barbero:</label>
+            <select id="barbero" name="barbero" required>
+                <option value="">Selecciona un barbero</option>
+                <option value="andres">Andrés R.</option>
+                <option value="kevin">Kevin M.</option>
+                <option value="jose">José L.</option>
+                <option value="daniel">Daniel P.</option>
             </select>
 
             <label for="fecha">Fecha de reserva:</label>
