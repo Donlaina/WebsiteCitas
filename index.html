@@ -11,8 +11,8 @@
 <body>
     <header>
         <h1 id="inicio">Barbería | Portal de Reservas</h1>
-        <!-- Lleva a la agenda del día (barbero/admin) -->
-        <a href="agenda.html" class="btn-admin">Admin</a>
+        <!-- Lleva a la agenda del día de citas -->
+        <a href="agenda.html" class="btn-admin">Agenda</a>
     </header>
 
     <section id="intro">
@@ -172,6 +172,61 @@
             `;
         }
     }
+    </script>
+    <!-- Guardar reservas (se ven en agenda.html) -->
+    <script>
+    const formulario = document.querySelector("#reservacion form");
+
+    formulario.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const campo = id => document.getElementById(id);
+        const textoElegido = id => campo(id).selectedOptions[0].text.trim();
+
+        const cita = {
+            id: String(Date.now()),
+            fecha: campo("fecha").value,
+            hora: campo("hora").value,
+            cliente: campo("nombre").value.trim(),
+            telefono: campo("telefono").value,
+            servicio: textoElegido("corte").split(" - ")[0],
+            barbero: textoElegido("barbero"),
+            notas: campo("informacion").value.trim(),
+            estado: "pendiente"
+        };
+
+        if (!cita.cliente) {
+            alert("Escribe tu nombre.");
+            return;
+        }
+
+        if (new Date(`${cita.fecha}T${cita.hora}`) < new Date()) {
+            alert("Esa hora ya pasó. Elige otra fecha u hora.");
+            return;
+        }
+
+        try {
+            const guardadas = JSON.parse(localStorage.getItem("citas"));
+            const citas = Array.isArray(guardadas) ? guardadas : [];
+
+            const ocupado = citas.some(c => c.estado !== "cancelada" && c.fecha === cita.fecha &&
+                c.hora === cita.hora && c.barbero === cita.barbero);
+
+            if (ocupado) {
+                alert("Ese barbero ya tiene una cita en ese horario. Elige otra hora.");
+                return;
+            }
+
+            citas.push(cita);
+            localStorage.setItem("citas", JSON.stringify(citas));
+        } catch (error) {
+            alert("No se pudo guardar la cita.");
+            return;
+        }
+
+        alert("¡Cita reservada! Ya aparece en la Agenda.");
+        formulario.reset();
+    });
     </script>
 </body>
 </html>

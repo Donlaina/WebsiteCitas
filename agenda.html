@@ -3,123 +3,199 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barbería | Agenda</title>
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <title>Barbería | Agenda del Día</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --pizarra: #364552; --fondo: #efefef; --blanco: #fff; --linea: #dcdfe2; --gris: #5f6b75;
+      --azul: #6495ED; --azul-fuerte: #2f5fc4;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Montserrat', sans-serif; background: #efefef; color: #364552; }
+    body { font-family: 'Montserrat', sans-serif; background: var(--fondo); color: var(--pizarra); }
+    button, select, input, textarea { font: inherit; font-size: 14px; color: var(--pizarra); }
+    button { cursor: pointer; border: 1px solid var(--linea); background: var(--blanco); border-radius: 8px; padding: 9px 14px; font-weight: 600; }
+    button:hover { border-color: var(--pizarra); }
+    :focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; }
+    .principal { background: var(--azul-fuerte); border-color: var(--azul-fuerte); color: #fff; }
+    .principal:hover { background: #244d9f; }
 
-    header { position: relative; background: #364552; color: #fff; text-align: center; padding: 70px 20px 40px; }
-    .volver { position: absolute; top: 16px; left: 20px; color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; }
-    .volver:hover { text-decoration: underline; }
+    header { background: var(--pizarra); color: #fff; padding: 22px 16px 62px; }
+    .barra { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    header a { color: #cfd8e0; font-size: 13px; font-weight: 600; text-decoration: none; }
+    header a:hover { text-decoration: underline; }
+    header h1 { font-size: 30px; margin-top: 6px; }
 
-    main { max-width: 900px; margin: 0 auto; padding: 30px 16px 60px; }
+    main { max-width: 1100px; margin: -40px auto 0; padding: 0 16px 60px; }
+    .panel { background: var(--blanco); border-radius: 14px; box-shadow: 0 8px 24px rgba(54,69,82,.12); padding: 14px; margin-bottom: 18px; }
 
-    .controles { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; margin-bottom: 20px; }
-    .grupo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    button, select, input { font: inherit; font-size: 14px; color: #364552; background: #fff; border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; }
-    button { cursor: pointer; font-weight: 600; }
-    button:hover { background: #364552; color: #fff; }
+    .navegacion { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .navegacion input { border: 1px solid var(--linea); border-radius: 8px; padding: 8px 10px; margin-left: auto; }
+    .semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .dia { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 2px; font-size: 12px; }
+    .dia strong { font-size: 22px; }
+    .dia small { font-size: 11px; font-weight: 600; color: var(--gris); min-height: 14px; }
+    .dia.es-hoy { border-color: var(--azul); border-width: 2px; }
+    .dia[aria-pressed="true"] { background: var(--pizarra); border-color: var(--pizarra); color: #fff; }
+    .dia[aria-pressed="true"] small { color: #cfd8e0; }
 
-    .resumen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
-    .resumen button { display: flex; flex-direction: column; align-items: center; padding: 12px 4px; font-size: 12px; }
-    .resumen strong { font-size: 24px; }
-    .resumen button.activo { border-color: #364552; background: #364552; color: #fff; }
+    .filtros { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chips button { border-radius: 30px; padding: 7px 14px; font-size: 13px; }
+    .chips button[aria-pressed="true"] { background: var(--pizarra); border-color: var(--pizarra); color: #fff; }
 
-    #titulo-fecha { margin: 20px 0; font-size: 20px; color: #555; }
+    #titulo-fecha { font-size: 19px; margin-bottom: 12px; }
     #titulo-fecha::first-letter { text-transform: uppercase; }
 
-    .fila { display: grid; grid-template-columns: 64px 1fr; gap: 14px; min-height: 64px; border-top: 1px solid #d5d5d5; padding: 10px 0; }
-    .hora { color: #666; font-size: 14px; font-weight: 600; padding-top: 4px; }
-    .citas { display: flex; flex-direction: column; gap: 10px; }
-    .libre { color: #777; font-size: 13px; padding-top: 4px; }
+    .tablero { overflow: auto; max-height: 75vh; background: var(--blanco); border-radius: 14px; border: 1px solid var(--linea); }
+    .rejilla { display: grid; min-width: 100%; }
+    .celda { border-bottom: 1px solid var(--linea); border-left: 1px solid var(--linea); padding: 5px; min-height: 58px; display: flex; flex-direction: column; gap: 5px; }
+    .encabezado { position: sticky; top: 0; z-index: 2; background: #f7f8f9; min-height: 0; padding: 12px 8px; text-align: center; font-weight: 700; font-size: 14px; }
+    .hora { position: sticky; left: 0; z-index: 1; background: #f7f8f9; border-left: 0; font-size: 12px; font-weight: 600; color: var(--gris); justify-content: center; text-align: center; }
+    .encabezado.hora { z-index: 3; }
+    .ahora.hora { background: var(--azul-fuerte); color: #fff; }
+    .ahora { box-shadow: inset 0 2px 0 var(--azul-fuerte); }
 
-    .cita { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: #fff; border-left: 5px solid var(--color); border-radius: 8px; padding: 14px 16px; }
-    .cita h3 { font-size: 15px; margin-bottom: 4px; }
-    .cita p { font-size: 13px; color: #555; }
-    .cita.cancelada h3 { text-decoration: line-through; color: #666; }
-    .estado { display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 700; color: var(--color); border: 1px solid var(--color); border-radius: 20px; padding: 2px 10px; }
+    .libre { flex: 1; min-height: 46px; border: 1px dashed transparent; background: transparent; color: transparent; font-size: 12px; }
+    .libre:hover, .libre:focus-visible { border-color: var(--azul); background: #eef4ff; color: var(--azul-fuerte); }
+    .ocupado { font-size: 12px; color: var(--gris); margin: auto; }
 
-    .pendiente { --color: #9a6b00; }
-    .completada { --color: #1e7a46; }
-    .cancelada { --color: #b3362d; }
+    .pendiente { --color: #8a5d00; --suave: #fff4d6; }
+    .completada { --color: #176b3a; --suave: #e0f4e8; }
+    .cancelada { --color: #a52f27; --suave: #fbe6e4; }
+    .cita { text-align: left; background: var(--suave); border: 0; border-left: 5px solid var(--color); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+    .cita:hover { filter: brightness(.96); }
+    .cita strong { font-size: 13px; overflow-wrap: anywhere; }
+    .cita span { font-size: 12px; font-weight: 400; }
+    .cita em { font-size: 11px; font-style: normal; font-weight: 700; color: var(--color); }
+    .cita.cancelada strong { text-decoration: line-through; }
 
-    @media (max-width: 520px) {
-      header h1 { font-size: 24px; }
-      .resumen { grid-template-columns: repeat(2, 1fr); }
+    dialog { margin: auto; border: 0; border-radius: 14px; padding: 22px; width: min(440px, calc(100vw - 28px)); max-height: calc(100vh - 28px); color: var(--pizarra); }
+    dialog::backdrop { background: rgba(25,33,40,.65); }
+    dialog h2 { font-size: 20px; margin-bottom: 14px; overflow-wrap: anywhere; }
+    .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .campos label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 600; }
+    .campos .ancho { grid-column: 1 / -1; }
+    .campos input, .campos select, .campos textarea { width: 100%; border: 1px solid #c4c9ce; border-radius: 8px; padding: 9px 10px; background: #fff; font-weight: 400; }
+    #error { color: #a52f27; font-size: 13px; font-weight: 600; margin-top: 12px; }
+    .acciones { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 14px; }
+    dt { font-weight: 700; }
+    dd { overflow-wrap: anywhere; }
+
+    #aviso { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--pizarra); color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; width: max-content; max-width: calc(100vw - 28px); }
+    #aviso:empty { display: none; }
+
+    @media (max-width: 600px) {
+      .navegacion input { margin-left: 0; width: 100%; }
+      .semana { gap: 3px; }
+      .dia { font-size: 10px; }
+      .dia strong { font-size: 17px; }
+      .dia small { font-size: 10px; }
+      .campos { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <header>
-    <a class="volver" href="index.html">← Volver al inicio</a>
-    <h1>Barbería | Agenda del Día</h1>
+    <div class="barra">
+      <div>
+        <a href="index.html">Volver al inicio</a>
+        <h1>Agenda de la barbería</h1>
+      </div>
+      <button class="principal" id="nueva">+ Nueva cita</button>
+    </div>
   </header>
 
   <main>
-    <div class="controles">
-      <div class="grupo">
-        <button id="anterior" aria-label="Día anterior">‹</button>
-        <input type="date" id="fecha" aria-label="Fecha">
-        <button id="siguiente" aria-label="Día siguiente">›</button>
+    <section class="panel" aria-label="Elegir día">
+      <div class="navegacion">
+        <button id="anterior">Semana anterior</button>
         <button id="hoy">Hoy</button>
+        <button id="siguiente">Semana siguiente</button>
+        <input type="date" id="fecha" aria-label="Ir a una fecha">
       </div>
-      <label class="grupo">Barbero:
-        <select id="barbero"></select>
-      </label>
+      <div class="semana" id="semana"></div>
+    </section>
+
+    <div class="filtros">
+      <div class="chips" id="barberos" role="group" aria-label="Filtrar por barbero"></div>
+      <div class="chips" id="estados" role="group" aria-label="Filtrar por estado"></div>
     </div>
 
-    <div class="resumen" id="resumen"></div>
     <h2 id="titulo-fecha"></h2>
-    <section id="agenda"></section>
+    <div class="tablero"><div class="rejilla" id="rejilla"></div></div>
   </main>
 
+  <dialog id="dialogo-nueva">
+    <form id="formulario">
+      <h2>Nueva cita</h2>
+      <div class="campos">
+        <label class="ancho">Nombre del cliente <input name="cliente" required maxlength="60" pattern=".*\S.*"></label>
+        <label class="ancho">Teléfono (8 números) <input name="telefono" required inputmode="numeric" pattern="[0-9]{8}" maxlength="8"></label>
+        <label>Servicio <select name="servicio" required></select></label>
+        <label>Barbero <select name="barbero" required></select></label>
+        <label>Fecha <input type="date" name="fecha" required></label>
+        <label>Hora <select name="hora" required></select></label>
+        <label class="ancho">Notas (opcional) <textarea name="notas" rows="2"></textarea></label>
+      </div>
+      <p id="error" role="alert"></p>
+      <div class="acciones">
+        <button type="button" data-cerrar>Cerrar</button>
+        <button class="principal">Agendar cita</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialogo-detalle">
+    <h2 id="detalle-nombre"></h2>
+    <dl id="detalle-datos"></dl>
+    <div class="acciones" id="detalle-acciones"></div>
+  </dialog>
+
+  <div id="aviso" role="status"></div>
+
   <script>
-    // ===== DATOS DE PRUEBA (cambiar por tu backend) =====
+    // ===== DATOS =====
     const BARBEROS = ['Andrés R.', 'Kevin M.', 'José L.', 'Daniel P.'];
-
-    const CITAS_EJEMPLO = [
-      { hora: '09:00', cliente: 'Juan Pérez',     servicio: 'Corte Normal', barbero: 'Andrés R.', estado: 'completada' },
-      { hora: '09:30', cliente: 'Mario López',    servicio: 'Barba',        barbero: 'Kevin M.',   estado: 'completada' },
-      { hora: '11:00', cliente: 'Carlos Martínez', servicio: 'Gillette',     barbero: 'José L.', estado: 'cancelada' },
-      { hora: '13:00', cliente: 'Luis Hernández', servicio: 'Corte Normal', barbero: 'Kevin M.',   estado: 'pendiente' },
-      { hora: '14:30', cliente: 'David Castro',   servicio: 'Barba',        barbero: 'Andrés R.', estado: 'pendiente' },
-      { hora: '16:00', cliente: 'Mario Mejía',    servicio: 'Cejas',        barbero: 'Daniel P.', estado: 'pendiente' }
-    ];
-
+    const SERVICIOS = ['Corte Normal', 'Barba', 'Gillette', 'Cejas', 'Diseño'];
     const ESTADOS = { pendiente: 'Pendiente', completada: 'Completada', cancelada: 'Cancelada' };
-    const HORA_APERTURA = 8;
-    const HORA_CIERRE = 16;
+    // Mismos horarios que el formulario: de 08:00 a 16:30 cada media hora
+    const HORAS = Array.from({ length: 18 }, (_, i) =>
+      `${String(8 + Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`);
 
-    // Los cambios de estado se guardan en este navegador
-    let cambios = {};
-    try { cambios = JSON.parse(localStorage.getItem('agendaEstados')) || {}; } catch (e) {}
-
-    // Cuando tengas API, reemplaza esta función por un fetch que devuelva
-    // [{ id, hora, cliente, servicio, barbero, estado }]
-    function obtenerCitas(fecha) {
-      if (fecha !== aTexto(new Date())) return []; // los ejemplos son solo para hoy
-      return CITAS_EJEMPLO.map((c, i) => {
-        const id = `${fecha}-${i}`;
-        return { ...c, id, estado: cambios[id] || c.estado };
-      });
+    // Las citas se guardan en este navegador, junto con las del formulario de index.html.
+    // Cuando exista la API, solo hay que cambiar leerCitas y guardarCitas.
+    function leerCitas() {
+      try {
+        const datos = JSON.parse(localStorage.getItem('citas'));
+        return Array.isArray(datos) ? datos : [];
+      } catch (e) { return []; }
     }
 
-    function cambiarEstado(id, estado) {
-      cambios[id] = estado;
-      try { localStorage.setItem('agendaEstados', JSON.stringify(cambios)); } catch (e) {}
-      pintar();
+    function guardarCitas(citas) {
+      try { localStorage.setItem('citas', JSON.stringify(citas)); return true; }
+      catch (e) { avisar('No se pudo guardar. Revisa el almacenamiento del navegador.'); return false; }
     }
 
-    // ===== INTERFAZ =====
+    function estaOcupado(citas, cita) {
+      return citas.some(c => c.id !== cita.id && c.estado !== 'cancelada' &&
+        c.fecha === cita.fecha && c.hora === cita.hora && c.barbero === cita.barbero);
+    }
+
+    // ===== UTILIDADES =====
     const $ = id => document.getElementById(id);
-    let filtroEstado = 'todas';
 
-    // Fecha local en formato AAAA-MM-DD
     function aTexto(d) {
       const dos = n => String(n).padStart(2, '0');
       return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
+    }
+    const aFecha = texto => new Date(texto + 'T00:00');
+    const formato = (texto, opciones) => aFecha(texto).toLocaleDateString('es-GT', opciones);
+
+    function hora12(hora) {
+      const [h, m] = hora.split(':').map(Number);
+      return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
     }
 
     function crear(etiqueta, clase, texto) {
@@ -129,91 +205,213 @@
       return el;
     }
 
+    function boton(clase, texto, accion) {
+      const b = crear('button', clase, texto);
+      b.type = 'button';
+      b.onclick = accion;
+      return b;
+    }
+
+    let temporizador;
+    function avisar(mensaje) {
+      $('aviso').textContent = mensaje;
+      clearTimeout(temporizador);
+      temporizador = setTimeout(() => $('aviso').textContent = '', 3500);
+    }
+
+    // ===== PANTALLA =====
+    let fechaElegida = aTexto(new Date());
+    let filtroBarbero = '';
+    let filtroEstado = 'todas';
+
+    function irA(fecha) { fechaElegida = fecha; pintar(); }
+
+    function moverSemana(n) {
+      const d = aFecha(fechaElegida);
+      d.setDate(d.getDate() + n * 7);
+      irA(aTexto(d));
+    }
+
+    function pintarSemana(citas) {
+      const lunes = aFecha(fechaElegida);
+      lunes.setDate(lunes.getDate() - (lunes.getDay() + 6) % 7);
+
+      $('semana').replaceChildren(...Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(lunes);
+        d.setDate(lunes.getDate() + i);
+        const texto = aTexto(d);
+        const total = citas.filter(c => c.fecha === texto && c.estado !== 'cancelada' &&
+          (!filtroBarbero || c.barbero === filtroBarbero)).length;
+
+        const b = boton(`dia ${texto === aTexto(new Date()) ? 'es-hoy' : ''}`, '', () => irA(texto));
+        b.setAttribute('aria-pressed', texto === fechaElegida);
+        b.setAttribute('aria-label', `${formato(texto, { weekday: 'long', day: 'numeric', month: 'long' })}, citas: ${total}`);
+        b.append(
+          crear('span', '', formato(texto, { weekday: 'short' })),
+          crear('strong', '', String(d.getDate())),
+          crear('small', '', total ? `${total} cita${total > 1 ? 's' : ''}` : '')
+        );
+        return b;
+      }));
+    }
+
+    function pintarChips(contenedor, opciones, elegido, accion) {
+      $(contenedor).replaceChildren(...opciones.map(([valor, texto]) => {
+        const b = boton('', texto, () => { accion(valor); pintar(); });
+        b.setAttribute('aria-pressed', valor === elegido);
+        return b;
+      }));
+    }
+
     function tarjeta(cita) {
-      const card = crear('article', `cita ${cita.estado}`);
-      const info = crear('div');
-      info.append(
-        crear('h3', '', `${cita.hora} · ${cita.cliente}`),
-        crear('p', '', `${cita.servicio} — Barbero: ${cita.barbero}`),
-        crear('span', 'estado', ESTADOS[cita.estado])
+      const b = boton(`cita ${cita.estado}`, '', () => verDetalle(cita.id));
+      b.append(
+        crear('strong', '', cita.cliente),
+        crear('span', '', cita.servicio),
+        crear('em', '', ESTADOS[cita.estado])
       );
+      return b;
+    }
 
-      const acciones = crear('div', 'grupo');
-      const opciones = cita.estado === 'pendiente'
-        ? [['✔ Completar', 'completada'], ['✖ Cancelar', 'cancelada']]
-        : [['↺ Reabrir', 'pendiente']];
+    function pintarRejilla(citasDia) {
+      const columnas = filtroBarbero ? [filtroBarbero] : BARBEROS;
+      const rejilla = $('rejilla');
+      rejilla.style.gridTemplateColumns = `84px repeat(${columnas.length}, minmax(150px, 1fr))`;
+      rejilla.replaceChildren(crear('div', 'celda encabezado hora', 'Hora'),
+        ...columnas.map(b => crear('div', 'celda encabezado', b)));
 
-      opciones.forEach(([texto, nuevo]) => {
-        const b = crear('button', '', texto);
-        b.onclick = () => cambiarEstado(cita.id, nuevo);
-        acciones.append(b);
+      const ahora = new Date();
+      const bloqueActual = `${String(ahora.getHours()).padStart(2, '0')}:${ahora.getMinutes() < 30 ? '00' : '30'}`;
+
+      HORAS.forEach(hora => {
+        const esAhora = fechaElegida === aTexto(ahora) && hora === bloqueActual ? 'ahora' : '';
+        rejilla.append(crear('div', `celda hora ${esAhora}`, hora12(hora)));
+
+        columnas.forEach(barbero => {
+          const celda = crear('div', `celda ${esAhora}`);
+          const enBloque = citasDia.filter(c => c.hora === hora && c.barbero === barbero);
+          const visibles = enBloque.filter(c => filtroEstado === 'todas' || c.estado === filtroEstado);
+          celda.append(...visibles.map(tarjeta));
+
+          const activa = enBloque.some(c => c.estado !== 'cancelada');
+          // En días pasados no se ofrece agendar
+          if (!activa && fechaElegida >= aTexto(ahora)) {
+            const libre = boton('libre', '+ Agendar', () => abrirNueva(hora, barbero));
+            libre.setAttribute('aria-label', `Agendar a las ${hora12(hora)} con ${barbero}`);
+            celda.append(libre);
+          } else if (activa && !visibles.some(c => c.estado !== 'cancelada')) {
+            celda.append(crear('span', 'ocupado', 'Ocupado'));
+          }
+          rejilla.append(celda);
+        });
       });
-
-      card.append(info, acciones);
-      return card;
     }
 
     function pintar() {
-      const fecha = $('fecha').value;
-      const barbero = $('barbero').value;
-      const delBarbero = obtenerCitas(fecha).filter(c => !barbero || c.barbero === barbero);
-      const visibles = delBarbero.filter(c => filtroEstado === 'todas' || c.estado === filtroEstado);
+      const citas = leerCitas();
+      const citasDia = citas.filter(c => c.fecha === fechaElegida);
+      const delBarbero = citasDia.filter(c => !filtroBarbero || c.barbero === filtroBarbero);
 
-      $('titulo-fecha').textContent = new Date(fecha + 'T00:00').toLocaleDateString('es-GT',
+      $('fecha').value = fechaElegida;
+      $('titulo-fecha').textContent = formato(fechaElegida,
         { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-      // Contadores que también filtran por estado
-      $('resumen').replaceChildren(...Object.entries({ todas: 'Todas', ...ESTADOS }).map(([clave, nombre]) => {
-        const total = delBarbero.filter(c => clave === 'todas' || c.estado === clave).length;
-        const b = crear('button', `${clave} ${filtroEstado === clave ? 'activo' : ''}`);
-        b.append(crear('strong', '', String(total)), crear('span', '', nombre));
-        b.onclick = () => { filtroEstado = clave; pintar(); };
-        return b;
-      }));
-
-      // Línea de tiempo
-      const agenda = $('agenda');
-      agenda.replaceChildren();
-
-      if (visibles.length === 0) {
-        agenda.append(crear('p', 'libre', 'No hay citas para este filtro.'));
-        return;
-      }
-
-      const horas = visibles.map(c => parseInt(c.hora, 10));
-      const desde = Math.min(HORA_APERTURA, ...horas);
-      const hasta = Math.max(HORA_CIERRE, ...horas);
-
-      for (let h = desde; h <= hasta; h++) {
-        const fila = crear('div', 'fila');
-        const lista = crear('div', 'citas');
-        const enEstaHora = visibles
-          .filter(c => parseInt(c.hora, 10) === h)
-          .sort((a, b) => a.hora.localeCompare(b.hora));
-
-        if (enEstaHora.length) lista.append(...enEstaHora.map(tarjeta));
-        else lista.append(crear('span', 'libre', filtroEstado === 'todas' ? 'Libre' : '—'));
-
-        fila.append(crear('div', 'hora', `${String(h).padStart(2, '0')}:00`), lista);
-        agenda.append(fila);
-      }
+      pintarSemana(citas);
+      pintarChips('barberos', [['', 'Todos'], ...BARBEROS.map(b => [b, b])], filtroBarbero, v => filtroBarbero = v);
+      pintarChips('estados', Object.entries({ todas: 'Todas', ...ESTADOS }).map(([valor, nombre]) => {
+        const total = delBarbero.filter(c => valor === 'todas' || c.estado === valor).length;
+        return [valor, `${nombre} (${total})`];
+      }), filtroEstado, v => filtroEstado = v);
+      pintarRejilla(citasDia);
     }
 
-    function moverDia(n) {
-      const d = new Date($('fecha').value + 'T00:00');
-      d.setDate(d.getDate() + n);
-      $('fecha').value = aTexto(d);
+    // ===== NUEVA CITA =====
+    const formulario = $('formulario');
+    const campos = formulario.elements;
+
+    function abrirNueva(hora, barbero) {
+      formulario.reset();
+      $('error').textContent = '';
+      const hoy = aTexto(new Date());
+      campos.fecha.min = hoy;
+      campos.fecha.value = fechaElegida < hoy ? hoy : fechaElegida;
+      campos.barbero.value = barbero || filtroBarbero || '';
+      campos.hora.value = hora || '';
+      $('dialogo-nueva').showModal();
+    }
+
+    formulario.onsubmit = e => {
+      e.preventDefault();
+      const datos = Object.fromEntries(new FormData(formulario));
+      const cita = { ...datos, cliente: datos.cliente.trim(), notas: datos.notas.trim(),
+        id: String(Date.now()), estado: 'pendiente' };
+      const citas = leerCitas();
+
+      if (estaOcupado(citas, cita)) {
+        $('error').textContent = `${cita.barbero} ya tiene una cita a esa hora. Elige otra hora u otro barbero.`;
+        return;
+      }
+      if (!guardarCitas([...citas, cita])) return;
+
+      $('dialogo-nueva').close();
+      filtroEstado = 'todas';
+      if (filtroBarbero && filtroBarbero !== cita.barbero) filtroBarbero = cita.barbero;
+      irA(cita.fecha);
+      avisar('Cita agendada');
+    };
+
+    // ===== DETALLE =====
+    function cambiarEstado(id, estado) {
+      const citas = leerCitas();
+      const cita = citas.find(c => c.id === id);
+      if (cita) {
+        if (estado !== 'cancelada' && estaOcupado(citas, cita)) {
+          avisar('No se puede reabrir: ese horario ya está ocupado.');
+        } else {
+          cita.estado = estado;
+          if (guardarCitas(citas)) avisar(`Cita ${ESTADOS[estado].toLowerCase()}`);
+        }
+      }
+      $('dialogo-detalle').close();
       pintar();
     }
 
-    $('barbero').append(new Option('Todos (Admin)', ''), ...BARBEROS.map(b => new Option(b, b)));
-    $('fecha').value = aTexto(new Date());
+    function verDetalle(id) {
+      const cita = leerCitas().find(c => c.id === id);
+      if (!cita) return pintar();
 
-    $('fecha').onchange = () => { if (!$('fecha').value) $('fecha').value = aTexto(new Date()); pintar(); };
-    $('barbero').onchange = pintar;
-    $('anterior').onclick = () => moverDia(-1);
-    $('siguiente').onclick = () => moverDia(1);
-    $('hoy').onclick = () => { $('fecha').value = aTexto(new Date()); pintar(); };
+      $('detalle-nombre').textContent = cita.cliente;
+      const datos = [
+        ['Estado', ESTADOS[cita.estado]], ['Servicio', cita.servicio], ['Barbero', cita.barbero],
+        ['Fecha', formato(cita.fecha, { day: 'numeric', month: 'long', year: 'numeric' })],
+        ['Hora', hora12(cita.hora)], ['Teléfono', cita.telefono], ['Notas', cita.notas || 'Sin notas']
+      ];
+      $('detalle-datos').replaceChildren(...datos.flatMap(([a, b]) => [crear('dt', '', a), crear('dd', '', b)]));
+
+      const opciones = cita.estado === 'pendiente'
+        ? [['Cancelar cita', 'cancelada', ''], ['Marcar completada', 'completada', 'principal']]
+        : [['Volver a pendiente', 'pendiente', 'principal']];
+      $('detalle-acciones').replaceChildren(
+        boton('', 'Cerrar', () => $('dialogo-detalle').close()),
+        ...opciones.map(([texto, estado, clase]) => boton(clase, texto, () => cambiarEstado(id, estado)))
+      );
+      $('dialogo-detalle').showModal();
+    }
+
+    // ===== INICIO =====
+    campos.servicio.append(new Option('Selecciona', ''), ...SERVICIOS.map(s => new Option(s, s)));
+    campos.barbero.append(new Option('Selecciona', ''), ...BARBEROS.map(b => new Option(b, b)));
+    campos.hora.append(new Option('Selecciona', ''), ...HORAS.map(h => new Option(hora12(h), h)));
+
+    $('nueva').onclick = () => abrirNueva();
+    $('anterior').onclick = () => moverSemana(-1);
+    $('siguiente').onclick = () => moverSemana(1);
+    $('hoy').onclick = () => irA(aTexto(new Date()));
+    $('fecha').onchange = () => irA($('fecha').value || aTexto(new Date()));
+    document.querySelector('[data-cerrar]').onclick = () => $('dialogo-nueva').close();
+
+    // Se actualiza si se reserva desde otra pestaña
+    window.addEventListener('storage', pintar);
 
     pintar();
   </script>
