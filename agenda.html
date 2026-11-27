@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <title>Barbería | Agenda del Día</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', sans-serif; background: #efefef; color: #364552; }
+
+    header { position: relative; background: #364552; color: #fff; text-align: center; padding: 70px 20px 40px; }
+    .volver { position: absolute; top: 16px; left: 20px; color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; }
+    .volver:hover { text-decoration: underline; }
+
+    main { max-width: 900px; margin: 0 auto; padding: 30px 16px 60px; }
+
+    .controles { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; margin-bottom: 20px; }
+    .grupo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    button, select, input { font: inherit; font-size: 14px; color: #364552; background: #fff; border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; }
+    button { cursor: pointer; font-weight: 600; }
+    button:hover { background: #364552; color: #fff; }
+
+    .resumen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+    .resumen button { display: flex; flex-direction: column; align-items: center; padding: 12px 4px; font-size: 12px; }
+    .resumen strong { font-size: 24px; }
+    .resumen button.activo { border-color: #364552; background: #364552; color: #fff; }
+
+    #titulo-fecha { margin: 20px 0; font-size: 20px; color: #555; }
+    #titulo-fecha::first-letter { text-transform: uppercase; }
+
+    .fila { display: grid; grid-template-columns: 64px 1fr; gap: 14px; min-height: 64px; border-top: 1px solid #d5d5d5; padding: 10px 0; }
+    .hora { color: #666; font-size: 14px; font-weight: 600; padding-top: 4px; }
+    .citas { display: flex; flex-direction: column; gap: 10px; }
+    .libre { color: #777; font-size: 13px; padding-top: 4px; }
+
+    .cita { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: #fff; border-left: 5px solid var(--color); border-radius: 8px; padding: 14px 16px; }
+    .cita h3 { font-size: 15px; margin-bottom: 4px; }
+    .cita p { font-size: 13px; color: #555; }
+    .cita.cancelada h3 { text-decoration: line-through; color: #666; }
+    .estado { display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 700; color: var(--color); border: 1px solid var(--color); border-radius: 20px; padding: 2px 10px; }
+
+    .pendiente { --color: #9a6b00; }
+    .completada { --color: #1e7a46; }
+    .cancelada { --color: #b3362d; }
+
+    @media (max-width: 520px) {
+      header h1 { font-size: 24px; }
+      .resumen { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="volver" href="index.html">← Volver al inicio</a>
+    <h1>Barbería | Agenda del Día</h1>
+  </header>
+
+  <main>
+    <div class="controles">
+      <div class="grupo">
+        <button id="anterior" aria-label="Día anterior">‹</button>
+        <input type="date" id="fecha" aria-label="Fecha">
+        <button id="siguiente" aria-label="Día siguiente">›</button>
+        <button id="hoy">Hoy</button>
+      </div>
+      <label class="grupo">Barbero:
+        <select id="barbero"></select>
+      </label>
+    </div>
+
+    <div class="resumen" id="resumen"></div>
+    <h2 id="titulo-fecha"></h2>
+    <section id="agenda"></section>
+  </main>
+
+  <script>
+    // ===== DATOS DE PRUEBA (cambiar por tu backend) =====
+    const BARBEROS = ['Andrés R.', 'Kevin M.', 'José L.', 'Daniel P.'];
+
+    const CITAS_EJEMPLO = [
+      { hora: '09:00', cliente: 'Juan Pérez',     servicio: 'Corte Normal', barbero: 'Andrés R.', estado: 'completada' },
+      { hora: '09:30', cliente: 'Mario López',    servicio: 'Barba',        barbero: 'Kevin M.',   estado: 'completada' },
+      { hora: '11:00', cliente: 'Carlos Martínez', servicio: 'Gillette',     barbero: 'José L.', estado: 'cancelada' },
+      { hora: '13:00', cliente: 'Luis Hernández', servicio: 'Corte Normal', barbero: 'Kevin M.',   estado: 'pendiente' },
+      { hora: '14:30', cliente: 'David Castro',   servicio: 'Barba',        barbero: 'Andrés R.', estado: 'pendiente' },
+      { hora: '16:00', cliente: 'Mario Mejía',    servicio: 'Cejas',        barbero: 'Daniel P.', estado: 'pendiente' }
+    ];
+
+    const ESTADOS = { pendiente: 'Pendiente', completada: 'Completada', cancelada: 'Cancelada' };
+    const HORA_APERTURA = 8;
+    const HORA_CIERRE = 16;
+
+    // Los cambios de estado se guardan en este navegador
+    let cambios = {};
+    try { cambios = JSON.parse(localStorage.getItem('agendaEstados')) || {}; } catch (e) {}
+
+    // Cuando tengas API, reemplaza esta función por un fetch que devuelva
+    // [{ id, hora, cliente, servicio, barbero, estado }]
+    function obtenerCitas(fecha) {
+      if (fecha !== aTexto(new Date())) return []; // los ejemplos son solo para hoy
+      return CITAS_EJEMPLO.map((c, i) => {
+        const id = `${fecha}-${i}`;
+        return { ...c, id, estado: cambios[id] || c.estado };
+      });
+    }
+
+    function cambiarEstado(id, estado) {
+      cambios[id] = estado;
+      try { localStorage.setItem('agendaEstados', JSON.stringify(cambios)); } catch (e) {}
+      pintar();
+    }
+
+    // ===== INTERFAZ =====
+    const $ = id => document.getElementById(id);
+    let filtroEstado = 'todas';
+
+    // Fecha local en formato AAAA-MM-DD
+    function aTexto(d) {
+      const dos = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
+    }
+
+    function crear(etiqueta, clase, texto) {
+      const el = document.createElement(etiqueta);
+      if (clase) el.className = clase;
+      if (texto) el.textContent = texto;
+      return el;
+    }
+
+    function tarjeta(cita) {
+      const card = crear('article', `cita ${cita.estado}`);
+      const info = crear('div');
+      info.append(
+        crear('h3', '', `${cita.hora} · ${cita.cliente}`),
+        crear('p', '', `${cita.servicio} — Barbero: ${cita.barbero}`),
+        crear('span', 'estado', ESTADOS[cita.estado])
+      );
+
+      const acciones = crear('div', 'grupo');
+      const opciones = cita.estado === 'pendiente'
+        ? [['✔ Completar', 'completada'], ['✖ Cancelar', 'cancelada']]
+        : [['↺ Reabrir', 'pendiente']];
+
+      opciones.forEach(([texto, nuevo]) => {
+        const b = crear('button', '', texto);
+        b.onclick = () => cambiarEstado(cita.id, nuevo);
+        acciones.append(b);
+      });
+
+      card.append(info, acciones);
+      return card;
+    }
+
+    function pintar() {
+      const fecha = $('fecha').value;
+      const barbero = $('barbero').value;
+      const delBarbero = obtenerCitas(fecha).filter(c => !barbero || c.barbero === barbero);
+      const visibles = delBarbero.filter(c => filtroEstado === 'todas' || c.estado === filtroEstado);
+
+      $('titulo-fecha').textContent = new Date(fecha + 'T00:00').toLocaleDateString('es-GT',
+        { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      // Contadores que también filtran por estado
+      $('resumen').replaceChildren(...Object.entries({ todas: 'Todas', ...ESTADOS }).map(([clave, nombre]) => {
+        const total = delBarbero.filter(c => clave === 'todas' || c.estado === clave).length;
+        const b = crear('button', `${clave} ${filtroEstado === clave ? 'activo' : ''}`);
+        b.append(crear('strong', '', String(total)), crear('span', '', nombre));
+        b.onclick = () => { filtroEstado = clave; pintar(); };
+        return b;
+      }));
+
+      // Línea de tiempo
+      const agenda = $('agenda');
+      agenda.replaceChildren();
+
+      if (visibles.length === 0) {
+        agenda.append(crear('p', 'libre', 'No hay citas para este filtro.'));
+        return;
+      }
+
+      const horas = visibles.map(c => parseInt(c.hora, 10));
+      const desde = Math.min(HORA_APERTURA, ...horas);
+      const hasta = Math.max(HORA_CIERRE, ...horas);
+
+      for (let h = desde; h <= hasta; h++) {
+        const fila = crear('div', 'fila');
+        const lista = crear('div', 'citas');
+        const enEstaHora = visibles
+          .filter(c => parseInt(c.hora, 10) === h)
+          .sort((a, b) => a.hora.localeCompare(b.hora));
+
+        if (enEstaHora.length) lista.append(...enEstaHora.map(tarjeta));
+        else lista.append(crear('span', 'libre', filtroEstado === 'todas' ? 'Libre' : '—'));
+
+        fila.append(crear('div', 'hora', `${String(h).padStart(2, '0')}:00`), lista);
+        agenda.append(fila);
+      }
+    }
+
+    function moverDia(n) {
+      const d = new Date($('fecha').value + 'T00:00');
+      d.setDate(d.getDate() + n);
+      $('fecha').value = aTexto(d);
+      pintar();
+    }
+
+    $('barbero').append(new Option('Todos (Admin)', ''), ...BARBEROS.map(b => new Option(b, b)));
+    $('fecha').value = aTexto(new Date());
+
+    $('fecha').onchange = () => { if (!$('fecha').value) $('fecha').value = aTexto(new Date()); pintar(); };
+    $('barbero').onchange = pintar;
+    $('anterior').onclick = () => moverDia(-1);
+    $('siguiente').onclick = () => moverDia(1);
+    $('hoy').onclick = () => { $('fecha').value = aTexto(new Date()); pintar(); };
+
+    pintar();
+  </script>
+</body>
+</html>
